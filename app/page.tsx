@@ -5,10 +5,11 @@ import { useStore } from "@/lib/store";
 import { ProductScreen } from "@/components/screens/ProductScreen";
 import { ProfileScreen } from "@/components/screens/ProfileScreen";
 import { BattleSheet } from "@/components/screens/BattleSheet";
+import { SearchScreen } from "@/components/screens/SearchScreen";
 import { SellerNotifyScreen } from "@/components/screens/SellerNotifyScreen";
 import { SellerReviewScreen } from "@/components/screens/SellerReviewScreen";
 
-type View = "product" | "profile" | "notify" | "review";
+type View = "product" | "search" | "profile" | "notify" | "review";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -33,9 +34,20 @@ export default function Home() {
               <ProductScreen
                 unread={unread}
                 onOpenBattle={() => setBattleOpen(true)}
+                onOpenSearch={() => setView("search")}
                 onBell={() => setView("notify")}
                 onMypage={() => setView("profile")}
               />
+
+              {view === "search" && (
+                <SearchScreen
+                  unread={unread}
+                  onBack={() => setView("product")}
+                  onOpenProduct={() => setView("product")}
+                  onBell={() => setView("notify")}
+                  onMypage={() => setView("profile")}
+                />
+              )}
 
               {view === "profile" && <ProfileScreen onBack={() => setView("product")} />}
 

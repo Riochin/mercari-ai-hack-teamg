@@ -69,6 +69,12 @@ export const NavIcons: Record<string, (active: boolean) => JSX.Element> = {
       <path d="M5 20c1-3.5 4-5.5 7-5.5s6 2 7 5.5" stroke={c(a)} strokeWidth="1.7" strokeLinecap="round" />
     </svg>
   ),
+  sell: (a) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M4 8h3l1.5-2h7L17 8h3v11H4z" stroke={c(a)} strokeWidth="1.7" strokeLinejoin="round" />
+      <circle cx="12" cy="13.5" r="3" stroke={c(a)} strokeWidth="1.7" />
+    </svg>
+  ),
 };
 
 export const CameraIcon = () => (

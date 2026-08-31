@@ -1,4 +1,4 @@
-import { StatusIcons, NavIcons, CameraIcon } from "./icons";
+import { StatusIcons, NavIcons } from "./icons";
 
 export function StatusBar() {
   return (
@@ -28,10 +28,8 @@ export function BottomNav({ active, unread, onBell, onMypage }: BottomNavProps) 
         {unread > 0 && <span className="nav-badge">{unread}</span>}
         <span>お知らせ</span>
       </div>
-      <div className="nav-item camera">
-        <div className="circle">
-          <CameraIcon />
-        </div>
+      <div className="nav-item">
+        {NavIcons.sell(false)}
         <span>出品</span>
       </div>
       <div className="nav-item">
