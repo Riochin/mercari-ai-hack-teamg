@@ -13,10 +13,15 @@ import { DEFAULT_PERSONA } from "./negotiation";
 interface StoreState {
   persona: PersonaProfile;
   diagnosed: boolean;
+  // 診断結果画面に表示する「相棒キャラクター」のID（UIの演出用。共通データモデルの外）
+  characterId: string | null;
+  // ユーザーが相棒キャラクターにつけた名前（未設定なら命名ステップを表示する）
+  characterName: string | null;
   sessions: NegotiationSession[];
   notifications: AppNotification[];
 
-  setPersona: (p: PersonaProfile) => void;
+  setPersona: (p: PersonaProfile, characterId?: string | null) => void;
+  setCharacterName: (name: string) => void;
   resetDiagnosis: () => void;
 
   // 購入者が交渉を保存し、出品者への通知を1件発行する
@@ -35,12 +40,22 @@ export const useStore = create<StoreState>()(
     (set) => ({
       persona: DEFAULT_PERSONA,
       diagnosed: false,
+      characterId: null,
+      characterName: null,
       sessions: [],
       notifications: [],
 
-      setPersona: (p) => set({ persona: p, diagnosed: true }),
+      // 診断し直すたびに、名前は新しいキャラクターに合わせてつけ直してもらう
+      setPersona: (p, characterId = null) =>
+        set({ persona: p, diagnosed: true, characterId, characterName: null }),
+      setCharacterName: (name) => set({ characterName: name }),
       resetDiagnosis: () =>
-        set({ persona: DEFAULT_PERSONA, diagnosed: false }),
+        set({
+          persona: DEFAULT_PERSONA,
+          diagnosed: false,
+          characterId: null,
+          characterName: null,
+        }),
 
       requestPurchase: (session) =>
         set((s) => {
