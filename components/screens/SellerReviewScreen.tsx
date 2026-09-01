@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { BackChevron, Chevron } from "../icons";
 import { ChatBubble } from "../ChatBubble";
+import { CharacterAvatar } from "../CharacterAvatar";
 import { useStore } from "@/lib/store";
 import { yen } from "@/lib/negotiation";
+import { findCharacter } from "@/lib/characters";
 
 interface Props {
   sessionId: string;
@@ -44,6 +46,9 @@ export function SellerReviewScreen({ sessionId, onBack }: Props) {
   const minPrice = session.seller.minPrice;
   const discount = listPrice - finalPrice;
   const aboveMin = finalPrice >= minPrice;
+  const buyerCharacter = findCharacter(session.buyer.persona.type, session.buyer.characterId);
+  const buyerAiName = session.buyer.characterName?.trim() || "購入者AI";
+  const minDelta = finalPrice - minPrice;
 
   // すでに承認/見送り済みなら結果画面を表示
   if (session.status === "completed" || session.status === "declined") {
@@ -86,8 +91,22 @@ export function SellerReviewScreen({ sessionId, onBack }: Props) {
           </div>
         </div>
 
+        <div className="buyer-ai-summary">
+          <CharacterAvatar
+            character={buyerCharacter}
+            fallbackEmoji={session.buyer.persona.avatar}
+            size="mini"
+            decorative={false}
+          />
+          <div className="buyer-ai-copy">
+            <div className="buyer-ai-label">購入者の交渉AI</div>
+            <div className="buyer-ai-name">{buyerAiName}</div>
+            <div className="buyer-ai-type">{session.buyer.persona.name}</div>
+          </div>
+        </div>
+
         <div className="agree-hero">
-          <div className="ah-label">AIが合意しました</div>
+          <div className="ah-label">AI同士が合意した金額</div>
           <div className="ah-price">{yen(finalPrice)}</div>
           <div className="ah-diff">
             出品価格から <b>{yen(discount)}</b> の値引き
@@ -110,20 +129,23 @@ export function SellerReviewScreen({ sessionId, onBack }: Props) {
           </div>
         </div>
 
-        <button className={"accordion-toggle" + (expanded ? " open" : "")} onClick={() => setExpanded((v) => !v)}>
-          <span>やりとりを見る（{session.turns.length}往復）</span>
-          <Chevron color="#222" className="chev" />
-        </button>
-
-        {expanded && (
-          <div className="accordion-body">
-            <div className="log seller-view">
-              {session.turns.map((t, i) => (
-                <ChatBubble turn={t} key={i} />
-              ))}
+        <div className={"decision-guide " + (aboveMin ? "safe" : "caution")} role="status">
+          <span className="dg-icon" aria-hidden="true">{aboveMin ? "✓" : "!"}</span>
+          <div>
+            <div className="dg-title">
+              {aboveMin
+                ? "最低希望額の範囲内です"
+                : `最低希望額より ${yen(Math.abs(minDelta))} 低い提案です`}
+            </div>
+            <div className="dg-text">
+              {aboveMin
+                ? minDelta === 0
+                  ? "設定した最低希望額と同額です。"
+                  : `最低希望額より ${yen(minDelta)} 高い金額です。`
+                : "承認すると、設定した最低希望額を下回ります。"}
             </div>
           </div>
-        )}
+        </div>
 
         <div className="seller-actions">
           <button className="approve-btn" onClick={() => setSessionStatus(sessionId, "completed")}>
@@ -133,6 +155,27 @@ export function SellerReviewScreen({ sessionId, onBack }: Props) {
             今回は見送る
           </button>
         </div>
+
+        <button className={"accordion-toggle" + (expanded ? " open" : "")} onClick={() => setExpanded((v) => !v)}>
+          <span>やりとりを見る（{session.turns.length}往復）</span>
+          <Chevron color="#222" className="chev" />
+        </button>
+
+        {expanded && (
+          <div className="accordion-body">
+            <div className="log seller-view">
+              {session.turns.map((t, i) => (
+                <ChatBubble
+                  turn={t}
+                  buyerCharacter={buyerCharacter}
+                  buyerName={session.buyer.characterName}
+                  key={i}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

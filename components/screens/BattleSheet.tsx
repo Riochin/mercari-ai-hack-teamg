@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { PriceRequestSheet, type PriceReq } from "../PriceRequestSheet";
+import { CharacterAvatar } from "../CharacterAvatar";
 import { useStore, makeSessionId } from "@/lib/store";
+import { findCharacter } from "@/lib/characters";
 import {
   generateTurns,
   typeFromProfile,
@@ -40,8 +42,12 @@ interface Props {
 
 export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props) {
   const persona = useStore((s) => s.persona);
+  const characterId = useStore((s) => s.characterId);
+  const characterName = useStore((s) => s.characterName);
   const requestPurchase = useStore((s) => s.requestPurchase);
   const meta = typeFromProfile(persona);
+  const character = findCharacter(meta.type, characterId);
+  const buyerAiName = characterName?.trim() || "あなたのAI";
 
   const [step, setStep] = useState<"setup" | "battle">("setup");
   const [buyerWant, setBuyerWant] = useState(2000);
@@ -199,7 +205,7 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
     const turns = parsed.turns;
     for (let i = 0; i < turns.length; i++) {
       const t = turns[i];
-      const who = t.speaker === "seller" ? "出品者AI" : "あなたのAI";
+      const who = t.speaker === "seller" ? "出品者AI" : buyerAiName;
       const tension = t.tension ?? 0.3;
 
       // 「入力中…」インジケーター
@@ -272,7 +278,13 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
     const session: NegotiationSession = {
       sessionId: makeSessionId(),
       item: { name: "泥だんご", listPrice: ASK_PRICE, photo: "/dorodango.png" },
-      buyer: { name: "ゲスト太郎", want: buyerWant, persona },
+      buyer: {
+        name: "ゲスト太郎",
+        want: buyerWant,
+        persona,
+        characterId,
+        characterName: characterName?.trim() || null,
+      },
       seller: { minPrice: SELLER_MIN, stubbornness: SELLER_STUB },
       turns: result.turns,
       status: "seller_review",
@@ -376,9 +388,9 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
           </div>
 
           <div className="mytype-mini">
-            <span className="mytype-avatar">{meta.avatar}</span>
+            <CharacterAvatar character={character} fallbackEmoji={meta.avatar} size="mini" />
             <div className="mytype-info">
-              <div className="mytype-name">あなたのAI：{meta.name}</div>
+              <div className="mytype-name">あなたのAI：{characterName?.trim() || meta.name}</div>
               <button className="mytype-edit" type="button" onClick={onOpenProfile}>
                 性格を診断・変更する ›
               </button>
@@ -439,7 +451,15 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
                 <div className={"bubble-row " + lt.turn.speaker} key={idx}>
                   <span className="bname">{lt.who}</span>
                   <div className="brow-inline">
-                    <span className="bavatar">{lt.turn.emoji || "🙂"}</span>
+                    {lt.turn.speaker === "buyer" ? (
+                      <CharacterAvatar
+                        character={character}
+                        fallbackEmoji={lt.turn.emoji || meta.avatar}
+                        size="chat"
+                      />
+                    ) : (
+                      <span className="bavatar">{lt.turn.emoji || "🙂"}</span>
+                    )}
                     {lt.typing ? (
                       <div className={"bubble typing" + (lt.paused ? " paused" : "")}>
                         <span className="typing-dot" />

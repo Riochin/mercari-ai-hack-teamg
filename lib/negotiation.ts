@@ -22,28 +22,28 @@ export function typeFromProfile(p: {
     return {
       type: "gentleman",
       avatar: "🤵",
-      name: "紳士交渉人",
-      desc: "冷静に、何度も丁寧に交渉を重ねるタイプ。",
+      name: "微笑み外交官タイプ",
+      desc: "笑顔を絶やさず、じわじわ包囲網を狭めていく。気づいたときには、もう逃げ場がない。",
     };
   if (pushHigh && !politeHigh)
     return {
       type: "hot_blooded",
       avatar: "😤",
-      name: "熱血バーゲンハンター",
-      desc: "勢いと粘りで、とことん値切りにいくタイプ。",
+      name: "猪突猛進タイプ",
+      desc: "考えるより先に、体が動く。まっすぐすぎるその勢いが、意外と相手の心を動かす。",
     };
   if (!pushHigh && politeHigh)
     return {
       type: "listener",
       avatar: "🕊️",
-      name: "聞き上手さん",
-      desc: "相手の様子をうかがいながら、丁寧に譲るタイプ。",
+      name: "共感モンスタータイプ",
+      desc: "相手の気持ちを、まるごと飲み込むように聞く。気づけば、心を開いているのはあなたの方かも。",
     };
   return {
     type: "mypace",
     avatar: "😌",
-    name: "マイペースくん",
-    desc: "あっさり流れに任せる、力の抜けたタイプ。",
+    name: "脱力仙人タイプ",
+    desc: "勝ち負けなんて、気にしない。その抜けた力こそが、実はいちばんの武器だったりする。",
   };
 }
 
