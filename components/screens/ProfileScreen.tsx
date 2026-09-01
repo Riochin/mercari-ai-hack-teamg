@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TraitScale } from "../TraitScale";
 import { BackChevron } from "../icons";
+import { StatusBar, BottomNav } from "../PhoneChrome";
 import { useStore } from "@/lib/store";
 import { buildPersona, typeFromProfile } from "@/lib/negotiation";
 import { getCharacter } from "@/lib/characters";
@@ -50,7 +51,14 @@ const nl = (s: string) =>
 const randomOf = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 const average = (nums: number[]) => nums.reduce((a, b) => a + b, 0) / nums.length;
 
-export function ProfileScreen({ onBack }: { onBack: () => void }) {
+interface Props {
+  onBack: () => void;
+  unread: number;
+  onBell: () => void;
+  onMypage: () => void;
+}
+
+export function ProfileScreen({ onBack, unread, onBell, onMypage }: Props) {
   const persona = useStore((s) => s.persona);
   const diagnosed = useStore((s) => s.diagnosed);
   const characterName = useStore((s) => s.characterName);
@@ -102,9 +110,10 @@ export function ProfileScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="screen profile-screen">
+      <StatusBar />
       <div className="sheet-header">
         <BackChevron onClick={onBack} />
-        <span className="title">プロフィール</span>
+        <span className="title">あなたの交渉エージェント</span>
       </div>
       <div className="sheet-content">
         {stage === "revealed" && (
@@ -233,6 +242,7 @@ export function ProfileScreen({ onBack }: { onBack: () => void }) {
           </div>
         )}
       </div>
+      <BottomNav active="mypage" unread={unread} onBell={onBell} onMypage={onMypage} />
     </div>
   );
 }

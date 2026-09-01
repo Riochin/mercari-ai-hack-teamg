@@ -502,7 +502,7 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
                 {result.status === "agreed" ? (
                   requested ? (
                     <button className="confirm-btn" onClick={onGoNotify}>
-                      お知らせ（出品者）を見る ›
+                      やることリストを見る ›
                     </button>
                   ) : (
                     <button

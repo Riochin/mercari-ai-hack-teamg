@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { BackChevron } from "../icons";
+import { StatusBar, BottomNav } from "../PhoneChrome";
 import { CharacterAvatar } from "../CharacterAvatar";
 import { useStore } from "@/lib/store";
 import { getCharacter } from "@/lib/characters";
@@ -20,17 +21,21 @@ function timeAgo(iso: string) {
 interface Props {
   onBack: () => void;
   onOpenReview: (sessionId: string) => void;
+  unread: number;
+  onBell: () => void;
+  onMypage: () => void;
 }
 
-export function SellerNotifyScreen({ onBack, onOpenReview }: Props) {
+export function SellerNotifyScreen({ onBack, onOpenReview, unread, onBell, onMypage }: Props) {
   const notifications = useStore((s) => s.notifications);
   const sessions = useStore((s) => s.sessions);
 
   return (
     <div className="screen profile-screen">
+      <StatusBar />
       <div className="sheet-header">
         <BackChevron onClick={onBack} />
-        <span className="title">お知らせ（出品者）</span>
+        <span className="title">やることリスト</span>
       </div>
       <div className="content">
         {notifications.length === 0 ? (
@@ -81,6 +86,7 @@ export function SellerNotifyScreen({ onBack, onOpenReview }: Props) {
           </div>
         )}
       </div>
+      <BottomNav active="bell" unread={unread} onBell={onBell} onMypage={onMypage} />
     </div>
   );
 }

@@ -23,10 +23,10 @@ export function BottomNav({ active, unread, onBell, onMypage }: BottomNavProps) 
         {NavIcons.home(active === "home")}
         <span>ホーム</span>
       </div>
-      <button className="nav-item" type="button" onClick={onBell} aria-label="お知らせ">
+      <button className="nav-item" type="button" onClick={onBell} aria-label="いいね！">
         {NavIcons.bell(active === "bell")}
         {unread > 0 && <span className="nav-badge">{unread}</span>}
-        <span>お知らせ</span>
+        <span>いいね！</span>
       </button>
       <div className="nav-item">
         {NavIcons.sell(false)}
@@ -34,11 +34,11 @@ export function BottomNav({ active, unread, onBell, onMypage }: BottomNavProps) 
       </div>
       <div className="nav-item">
         {NavIcons.pay(active === "pay")}
-        <span>支払い</span>
+        <span>オークション</span>
       </div>
-      <button className="nav-item" type="button" onClick={onMypage} aria-label="マイページ">
+      <button className="nav-item" type="button" onClick={onMypage} aria-label="おさいふ">
         {NavIcons.mypage(active === "mypage")}
-        <span>マイページ</span>
+        <span>おさいふ</span>
       </button>
     </div>
   );
