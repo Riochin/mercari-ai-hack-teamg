@@ -6,6 +6,7 @@ import { BackChevron, Chevron } from "../icons";
 import { ChatBubble } from "../ChatBubble";
 import { useStore } from "@/lib/store";
 import { yen } from "@/lib/negotiation";
+import { findCharacter } from "@/lib/characters";
 
 interface Props {
   sessionId: string;
@@ -44,6 +45,7 @@ export function SellerReviewScreen({ sessionId, onBack }: Props) {
   const minPrice = session.seller.minPrice;
   const discount = listPrice - finalPrice;
   const aboveMin = finalPrice >= minPrice;
+  const buyerCharacter = findCharacter(session.buyer.persona.type, session.buyer.characterId);
 
   // すでに承認/見送り済みなら結果画面を表示
   if (session.status === "completed" || session.status === "declined") {
@@ -119,7 +121,12 @@ export function SellerReviewScreen({ sessionId, onBack }: Props) {
           <div className="accordion-body">
             <div className="log seller-view">
               {session.turns.map((t, i) => (
-                <ChatBubble turn={t} key={i} />
+                <ChatBubble
+                  turn={t}
+                  buyerCharacter={buyerCharacter}
+                  buyerName={session.buyer.characterName}
+                  key={i}
+                />
               ))}
             </div>
           </div>
