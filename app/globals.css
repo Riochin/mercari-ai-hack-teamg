@@ -327,6 +327,7 @@ body{
 .persona-first-line .bubble{
   background:#fff; color:var(--ink); border-bottom-left-radius:4px; padding:9px 10px; max-width:80%;
 }
+.persona-first-line .typing-dot{ background:var(--gray-1); }
 
 /* はじめての一言：キャラクター画像を丸アイコンで表示（.bavatar と同じ列に並ぶ） */
 .bavatar-img{

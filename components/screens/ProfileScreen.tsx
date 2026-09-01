@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TraitScale } from "../TraitScale";
 import { BackChevron } from "../icons";
 import { StatusBar, BottomNav } from "../PhoneChrome";
@@ -50,6 +50,7 @@ const nl = (s: string) =>
 
 const randomOf = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 const average = (nums: number[]) => nums.reduce((a, b) => a + b, 0) / nums.length;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 interface Props {
   onBack: () => void;
@@ -76,6 +77,32 @@ export function ProfileScreen({ onBack, unread, onBell, onMypage }: Props) {
 
   // quiz(未診断) → revealed(診断済み。名づけ欄は名前の有無で出し分け)
   const stage: "quiz" | "revealed" = diagnosed ? "revealed" : "quiz";
+
+  // 「はじめての一言」もチャットと同じ演出（入力中…→1文字ずつ表示）で見せる
+  const [flTyping, setFlTyping] = useState(true);
+  const [flText, setFlText] = useState("");
+
+  useEffect(() => {
+    if (stage !== "revealed") return;
+    let cancelled = false;
+    setFlTyping(true);
+    setFlText("");
+    const full = character.firstLine;
+    (async () => {
+      await sleep(700 + Math.random() * 300);
+      if (cancelled) return;
+      setFlTyping(false);
+      for (let c = 0; c < full.length; c++) {
+        if (cancelled) return;
+        setFlText(full.slice(0, c + 1));
+        await sleep(28);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, character.firstLine]);
 
   const fillAllRandomly = () => {
     setAnswers(Object.fromEntries(ALL_QUESTIONS.map((q) => [q.name, 1 + Math.floor(Math.random() * 7)])));
@@ -153,7 +180,15 @@ export function ProfileScreen({ onBack, unread, onBell, onMypage }: Props) {
                     />
                     <div className="bavatar-fallback is-hidden">{character.emoji}</div>
                   </div>
-                  <div className="bubble">{character.firstLine}</div>
+                  {flTyping ? (
+                    <div className="bubble typing">
+                      <span className="typing-dot" />
+                      <span className="typing-dot" />
+                      <span className="typing-dot" />
+                    </div>
+                  ) : (
+                    <div className="bubble">{flText}</div>
+                  )}
                 </div>
               </div>
 
