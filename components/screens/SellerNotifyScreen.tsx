@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import { BackChevron } from "../icons";
+import { CharacterAvatar } from "../CharacterAvatar";
 import { useStore } from "@/lib/store";
+import { getCharacter } from "@/lib/characters";
+import { yen } from "@/lib/negotiation";
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -43,8 +46,11 @@ export function SellerNotifyScreen({ onBack, onOpenReview }: Props) {
             {notifications.map((n) => {
               const session = sessions.find((s) => s.sessionId === n.sessionId);
               const photo = session?.item.photo ?? "/dorodango.png";
+              const buyerCharacter = session
+                ? getCharacter(session.buyer.persona.type)
+                : null;
               return (
-                <div className="notif-item" key={n.notificationId} onClick={() => onOpenReview(n.sessionId)}>
+                <button className="notif-item" type="button" key={n.notificationId} onClick={() => onOpenReview(n.sessionId)}>
                   <Image className="thumb" src={photo} alt="" width={48} height={48} />
                   <div className="n-body">
                     <div className="n-title">
@@ -52,9 +58,24 @@ export function SellerNotifyScreen({ onBack, onOpenReview }: Props) {
                       {n.title}
                     </div>
                     <div className="n-text">{n.body}</div>
+                    {session && (
+                      <div className="notif-ai-row">
+                        <CharacterAvatar
+                          character={buyerCharacter}
+                          fallbackEmoji={session.buyer.persona.avatar}
+                          size="chat"
+                        />
+                        <span className="notif-ai-name">
+                          {session.buyer.characterName?.trim() || "購入者AI"}
+                        </span>
+                        {session.finalPrice != null && (
+                          <span className="notif-ai-price">{yen(session.finalPrice)}</span>
+                        )}
+                      </div>
+                    )}
                     <div className="n-time">{timeAgo(n.createdAt)}</div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>

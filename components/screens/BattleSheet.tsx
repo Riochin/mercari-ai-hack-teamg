@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BackChevron } from "../icons";
+import { PriceRequestSheet, type PriceReq } from "../PriceRequestSheet";
+import { CharacterAvatar } from "../CharacterAvatar";
 import { useStore, makeSessionId } from "@/lib/store";
+import { getCharacter } from "@/lib/characters";
 import {
   generateTurns,
   typeFromProfile,
@@ -40,8 +42,11 @@ interface Props {
 
 export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props) {
   const persona = useStore((s) => s.persona);
+  const characterName = useStore((s) => s.characterName);
   const requestPurchase = useStore((s) => s.requestPurchase);
   const meta = typeFromProfile(persona);
+  const character = getCharacter(meta.type);
+  const buyerAiName = characterName?.trim() || "あなたのAI";
 
   const [step, setStep] = useState<"setup" | "battle">("setup");
   const [buyerWant, setBuyerWant] = useState(2000);
@@ -51,13 +56,18 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
 
   const [liveTurns, setLiveTurns] = useState<LiveTurn[]>([]);
   const [tug, setTug] = useState({ price: ASK_PRICE, turn: 0 });
-  const [ticker, setTicker] = useState({ price: "¥ -", turn: "交渉待機中" });
+  const [ticker, setTicker] = useState({ turn: "交渉待機中" });
+  const [priceNum, setPriceNum] = useState<number | null>(null);
+  const [priceDir, setPriceDir] = useState<"up" | "down" | "">("");
   const [result, setResult] = useState<GeneratedNegotiation | null>(null);
   const [requested, setRequested] = useState(false);
+  const [priceReq, setPriceReq] = useState<PriceReq | null>(null);
 
   const battleRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<HTMLDivElement>(null);
   const stampRef = useRef<HTMLDivElement>(null);
+  const tvNumRef = useRef<HTMLSpanElement>(null);
+  const prevPriceRef = useRef(ASK_PRICE);
   const runId = useRef(0);
 
   // シートを開くたびに設定画面から始める
@@ -65,12 +75,29 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
     if (open) {
       setStep("setup");
       setErr("");
+    } else {
+      runId.current++;
+      setRunning(false);
+      setLoading(false);
+      setPriceReq(null);
     }
   }, [open]);
 
   const scrollDown = () => {
     const el = battleRef.current;
     if (el) el.scrollTop = el.scrollHeight;
+  };
+
+  useEffect(() => {
+    if (result) requestAnimationFrame(scrollDown);
+  }, [result]);
+
+  const closeBattle = () => {
+    runId.current++;
+    setRunning(false);
+    setLoading(false);
+    setPriceReq(null);
+    onClose();
   };
 
   const bumpMarker = () => {
@@ -80,6 +107,49 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
     void m.offsetWidth;
     m.classList.add("pulled");
   };
+
+  // 「現在の提示額」の一回きりのスライド演出（増加/下降で向きを変える）
+  const bumpTicker = (dir: "up" | "down") => {
+    const el = tvNumRef.current;
+    if (!el) return;
+    el.classList.remove("roll-up", "roll-down");
+    void el.offsetWidth;
+    el.classList.add(dir === "up" ? "roll-up" : "roll-down");
+  };
+
+  // from→to まで数字をカウントアニメ。動き切るまで待てるよう Promise を返す
+  // （requestAnimationFrame は非表示タブで止まるため setTimeout で駆動）
+  const animatePrice = (from: number, to: number, myRun: number) =>
+    new Promise<void>((resolve) => {
+      if (from === to) {
+        setPriceNum(to);
+        resolve();
+        return;
+      }
+      const dir = to > from ? "up" : "down";
+      setPriceDir(dir);
+      bumpTicker(dir);
+      const dur = 650;
+      const steps = 26;
+      let k = 0;
+      const run = () => {
+        if (myRun !== runId.current) {
+          resolve();
+          return;
+        }
+        k += 1;
+        const p = k / steps;
+        const e = 1 - Math.pow(1 - p, 3); // easeOutCubic
+        setPriceNum(Math.round(from + (to - from) * e));
+        if (k < steps) {
+          setTimeout(run, dur / steps);
+        } else {
+          setPriceNum(to);
+          resolve();
+        }
+      };
+      run();
+    });
 
   const showAgreeStamp = () => {
     const s = stampRef.current;
@@ -102,7 +172,10 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
     setResult(null);
     setLiveTurns([]);
     setTug({ price: ASK_PRICE, turn: 0 });
-    setTicker({ price: "¥ -", turn: "交渉待機中" });
+    setTicker({ turn: "交渉待機中" });
+    setPriceNum(null);
+    setPriceDir("");
+    prevPriceRef.current = ASK_PRICE;
     setLoading(true);
 
     const myRun = ++runId.current;
@@ -131,7 +204,7 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
     const turns = parsed.turns;
     for (let i = 0; i < turns.length; i++) {
       const t = turns[i];
-      const who = t.speaker === "seller" ? "出品者AI" : "あなたのAI";
+      const who = t.speaker === "seller" ? "出品者AI" : buyerAiName;
       const tension = t.tension ?? 0.3;
 
       // 「入力中…」インジケーター
@@ -173,15 +246,22 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
         if (myRun !== runId.current) return;
       }
 
-      // 価格をポップ表示＋綱引き更新
+      // 提示額を確定 → 綱引きバーを動かし、「現在の提示額」で数字アニメを再生
       setLiveTurns((prev) => prev.map((x, j) => (j === i ? { ...x, showOffer: true } : x)));
       const nextTurn = Math.min(i + 1, MAX_TURN);
       setTug({ price: t.offer, turn: nextTurn });
-      setTicker({ price: yen(t.offer).replace("¥", "¥ "), turn: `交渉 ${nextTurn}/${MAX_TURN}` });
+      setTicker({ turn: `交渉 ${nextTurn}/${MAX_TURN}` });
       if (t.speaker === "buyer") bumpMarker();
       requestAnimationFrame(scrollDown);
 
-      await sleep(isLast ? 550 : 380 - tension * 120);
+      // 数字が動き切るまでチャットを止める（アニメ完了を待ってから次のターンへ）
+      const from = prevPriceRef.current;
+      await animatePrice(from, t.offer, myRun);
+      if (myRun !== runId.current) return;
+      prevPriceRef.current = t.offer;
+      setPriceDir("");
+
+      await sleep(isLast ? 300 : Math.max(140, 320 - tension * 120));
       if (myRun !== runId.current) return;
     }
 
@@ -197,7 +277,12 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
     const session: NegotiationSession = {
       sessionId: makeSessionId(),
       item: { name: "泥だんご", listPrice: ASK_PRICE, photo: "/dorodango.png" },
-      buyer: { name: "ゲスト太郎", want: buyerWant, persona },
+      buyer: {
+        name: "ゲスト太郎",
+        want: buyerWant,
+        persona,
+        characterName: characterName?.trim() || null,
+      },
       seller: { minPrice: SELLER_MIN, stubbornness: SELLER_STUB },
       turns: result.turns,
       status: "seller_review",
@@ -218,10 +303,23 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
   const buyerPct = 100 - pct(tug.price, buyerWant);
 
   return (
-    <div className={"sheet" + (open ? " open" : "")}>
+    <>
+    <div className={"sheet-backdrop" + (open ? " open" : "")} onClick={closeBattle} aria-hidden="true" />
+    <div
+      className={"sheet" + (open ? " open" : "")}
+      role={open ? "dialog" : undefined}
+      aria-modal={open && !priceReq ? true : undefined}
+      aria-hidden={!open || !!priceReq}
+      inert={!open || !!priceReq ? true : undefined}
+    >
+      <div className="sheet-grabber" />
       <div className="sheet-header">
-        <BackChevron onClick={onClose} />
-        <span className="title">AI値下げ交渉</span>
+        <button className="sheet-close" type="button" onClick={closeBattle} aria-label="閉じる">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M6 6l12 12M18 6L6 18" stroke="#222" strokeWidth="2.2" strokeLinecap="round" />
+          </svg>
+        </button>
+        <span className="title">AIにおまかせ交渉</span>
       </div>
 
       <div className="agree-stamp" ref={stampRef}>
@@ -230,51 +328,81 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
 
       {step === "setup" ? (
         <div className="sheet-content">
-          <div className="setup-card seller locked">
-            <span className="tag">出品者のAI</span>
-            <div className="seller-peek">
-              頑固さの目安　<span className="stars">{STUB_STARS}</span>
+          <div className="req-lead">AIがあなたに代わって値下げ交渉します</div>
+          <p className="req-desc">
+            希望価格を決めると、あなたのAIが出品者のAIとその場で自動交渉します。合意できたら
+            「お知らせ」へ通知が届くので、購入に進んでください。
+          </p>
+          <div className="req-notes">
+            ※交渉は数十秒でその場で完了します
+            <br />
+            ※合意した金額でのみ購入をリクエストできます
+          </div>
+          <div className="req-caution">
+            交渉が成立しても購入するかはあなた次第。気軽におまかせできます。
+          </div>
+          <button className="req-help" type="button" onClick={onOpenProfile}>
+            AIの性格について <span className="q">?</span>
+          </button>
+
+          <div className="req-divider" />
+
+          <div className="req-item">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="req-thumb" src="/dorodango.png" alt="泥だんご" />
+            <div className="req-item-info">
+              <div className="req-item-name">泥だんご</div>
+              <div className="req-item-price">
+                <b>{yen(ASK_PRICE)}</b> 送料込み
+              </div>
             </div>
           </div>
 
-          <div className="setup-card buyer">
-            <span className="tag">あなたのAI</span>
-            <div className="frow">
-              <label>希望額</label>
+          <div className="req-divider" />
+
+          <div className="seller-note">
+            出品者のAI　頑固さの目安 <span className="stars">{STUB_STARS}</span>
+          </div>
+
+          <div className="req-field">
+            <label className="req-field-label" htmlFor="buyer-want">希望価格</label>
+            <div className="want-input">
+              <span className="want-yen">¥</span>
               <input
+                id="buyer-want"
+                name="buyer-want"
                 type="number"
+                inputMode="numeric"
+                autoComplete="off"
+                aria-describedby={err ? "buyer-want-error" : "buyer-want-range"}
                 value={buyerWant}
                 step={100}
                 onChange={(e) => setBuyerWant(Number(e.target.value))}
               />
             </div>
-
-            <div className="mytype-mini">
-              <span className="mytype-avatar">{meta.avatar}</span>
-              <div className="mytype-info">
-                <div className="mytype-name">{meta.name}</div>
-                <div className="mytype-edit" onClick={onOpenProfile}>
-                  性格を診断・変更する ›
-                </div>
-              </div>
+            <div className="req-range" id="buyer-want-range">
+              希望できる価格は {yen(100)} 〜 {yen(ASK_PRICE - 1)} です
             </div>
           </div>
 
-          <div className="listprice-row">
-            <label>出品価格</label>
-            <span>{yen(ASK_PRICE)}</span>
+          <div className="mytype-mini">
+            <CharacterAvatar character={character} fallbackEmoji={meta.avatar} size="mini" />
+            <div className="mytype-info">
+              <div className="mytype-name">あなたのAI：{characterName?.trim() || meta.name}</div>
+              <button className="mytype-edit" type="button" onClick={onOpenProfile}>
+                性格を診断・変更する ›
+              </button>
+            </div>
           </div>
 
           <button className="start-btn" onClick={startBattle}>
-            交渉バトル開始
+            AIに交渉してもらう
           </button>
-          {err && <div className="err-msg">{err}</div>}
+          {err && <div className="err-msg" id="buyer-want-error" role="alert">{err}</div>}
         </div>
       ) : (
-        <div className="sheet-content" ref={battleRef}>
-          {loading && <div className="loading">交渉中…</div>}
-
-          <div className="stage">
+        <div className="battle-view">
+          <div className="battle-top">
             <div className="turnrow">
               {[1, 2, 3, 4, 5].map((i) => (
                 <span
@@ -301,27 +429,35 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
               <div className="tug-fill-buyer" style={{ width: buyerPct + "%" }} />
               <div className="tug-fill-seller" style={{ width: 100 - buyerPct + "%" }} />
               <div className="tug-target-line" style={{ left: "0%" }} />
-              <div className="tug-marker" ref={markerRef} style={{ left: buyerPct + "%" }}>
-                🧶
-              </div>
+              <div className="tug-marker" ref={markerRef} style={{ left: 100 - buyerPct + "%" }} />
             </div>
-            <div className="tug-ends">
-              <span className="tug-end buyer">← 押し切る</span>
-              <span className="tug-end seller">粘る →</span>
-            </div>
-
             <div className="ticker">
               <div className="tl">現在の提示額</div>
-              <div className="tv">{ticker.price}</div>
+              <div className={"tv " + priceDir}>
+                <span className="tv-num" ref={tvNumRef}>
+                  {priceNum == null ? "¥ -" : "¥ " + priceNum.toLocaleString()}
+                </span>
+              </div>
               <div className="tt">{ticker.turn}</div>
             </div>
+          </div>
 
-            <div className="log">
+          <div className="battle-scroll" ref={battleRef}>
+            {loading && <div className="loading" role="status">交渉中…</div>}
+            <div className="log" aria-live="polite" aria-busy={running}>
               {liveTurns.map((lt, idx) => (
                 <div className={"bubble-row " + lt.turn.speaker} key={idx}>
                   <span className="bname">{lt.who}</span>
                   <div className="brow-inline">
-                    <span className="bavatar">{lt.turn.emoji || "🙂"}</span>
+                    {lt.turn.speaker === "buyer" ? (
+                      <CharacterAvatar
+                        character={character}
+                        fallbackEmoji={lt.turn.emoji || meta.avatar}
+                        size="chat"
+                      />
+                    ) : (
+                      <span className="bavatar">{lt.turn.emoji || "🙂"}</span>
+                    )}
                     {lt.typing ? (
                       <div className={"bubble typing" + (lt.paused ? " paused" : "")}>
                         <span className="typing-dot" />
@@ -342,7 +478,7 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
             </div>
 
             {result && (
-              <div className={"result " + (result.status === "agreed" ? "agreed" : "stalled")}>
+              <div className={"result " + (result.status === "agreed" ? "agreed" : "stalled")} role="status">
                 {result.status === "agreed" && result.finalPrice ? (
                   <>
                     <div className="rt">AIが合意額を見つけました</div>
@@ -369,8 +505,20 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
                       お知らせ（出品者）を見る ›
                     </button>
                   ) : (
-                    <button className="confirm-btn" onClick={confirmPurchase}>
-                      この金額で購入をリクエスト
+                    <button
+                      className="confirm-btn"
+                      onClick={() =>
+                        result?.finalPrice &&
+                        setPriceReq({
+                          name: "泥だんご",
+                          listPrice: ASK_PRICE,
+                          agreedPrice: result.finalPrice,
+                          photo: "/dorodango.png",
+                          onSubmit: confirmPurchase,
+                        })
+                      }
+                    >
+                      この金額で値下げ依頼
                     </button>
                   )
                 ) : (
@@ -390,5 +538,7 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
         </div>
       )}
     </div>
+    <PriceRequestSheet req={priceReq} onClose={() => setPriceReq(null)} />
+    </>
   );
 }

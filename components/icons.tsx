@@ -1,19 +1,19 @@
 // プロトタイプ由来の SVG アイコン群（同じパス・同じ色を踏襲）
 import type { JSX } from "react";
 
-export const BackChevron = (props: { onClick?: () => void; className?: string }) => (
-  <svg
-    onClick={props.onClick}
-    className={props.className}
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    style={props.onClick ? { cursor: "pointer" } : undefined}
-  >
-    <path d="M15 5l-7 7 7 7" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
+export const BackChevron = (props: { onClick?: () => void; className?: string }) => {
+  const icon = (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M15 5l-7 7 7 7" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+  if (!props.onClick) return icon;
+  return (
+    <button type="button" className={`icon-button ${props.className ?? ""}`} onClick={props.onClick} aria-label="戻る">
+      {icon}
+    </button>
+  );
+};
 
 export const StatusIcons = () => (
   <span className="icons">
@@ -67,6 +67,12 @@ export const NavIcons: Record<string, (active: boolean) => JSX.Element> = {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="8" r="3.5" stroke={c(a)} strokeWidth="1.7" />
       <path d="M5 20c1-3.5 4-5.5 7-5.5s6 2 7 5.5" stroke={c(a)} strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  ),
+  sell: (a) => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M4 8h3l1.5-2h7L17 8h3v11H4z" stroke={c(a)} strokeWidth="1.7" strokeLinejoin="round" />
+      <circle cx="12" cy="13.5" r="3" stroke={c(a)} strokeWidth="1.7" />
     </svg>
   ),
 };

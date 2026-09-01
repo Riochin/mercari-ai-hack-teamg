@@ -52,7 +52,12 @@ export type SessionStatus =
 export interface NegotiationSession {
   sessionId: string;
   item: { name: string; listPrice: number; photo: string };
-  buyer: { name: string; want: number; persona: PersonaProfile };
+  buyer: {
+    name: string;
+    want: number;
+    persona: PersonaProfile;
+    characterName?: string | null;
+  };
   seller: { minPrice: number; stubbornness: number }; // 出品時設定済み・購入者には非公開
   turns: Turn[];
   status: SessionStatus;
