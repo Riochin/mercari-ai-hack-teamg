@@ -1,5 +1,5 @@
 import type { Turn } from "@/lib/types";
-import type { CharacterMeta } from "@/lib/characters";
+import { SELLER_CHARACTER, type CharacterMeta } from "@/lib/characters";
 import { yen } from "@/lib/negotiation";
 import { CharacterAvatar } from "./CharacterAvatar";
 
@@ -20,7 +20,7 @@ export function ChatBubble({ turn, buyerCharacter = null, buyerName = null }: Pr
         {turn.speaker === "buyer" ? (
           <CharacterAvatar character={buyerCharacter} fallbackEmoji={turn.emoji || "🙂"} size="chat" />
         ) : (
-          <span className="bavatar">{turn.emoji || "🙂"}</span>
+          <CharacterAvatar character={SELLER_CHARACTER} fallbackEmoji={SELLER_CHARACTER.emoji} size="chat" />
         )}
         <div className="bubble">
           <span className="btext">{turn.message}</span>

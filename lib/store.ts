@@ -76,11 +76,16 @@ export const useStore = create<StoreState>()(
           };
         }),
 
+      // 承認/見送りで対応済みになった依頼は、やることリストから消す
       setSessionStatus: (sessionId, status) =>
         set((s) => ({
           sessions: s.sessions.map((x) =>
             x.sessionId === sessionId ? { ...x, status } : x,
           ),
+          notifications:
+            status === "completed" || status === "declined"
+              ? s.notifications.filter((n) => n.sessionId !== sessionId)
+              : s.notifications,
         })),
 
       markNotificationRead: (notificationId) =>
