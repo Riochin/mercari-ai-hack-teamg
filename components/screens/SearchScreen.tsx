@@ -4,7 +4,10 @@ import { useState } from "react";
 import { StatusBar, BottomNav } from "../PhoneChrome";
 import { Dango } from "../Dango";
 import { PriceRequestSheet, type PriceReq } from "../PriceRequestSheet";
-import { yen } from "@/lib/negotiation";
+import { CharacterAvatar } from "../CharacterAvatar";
+import { useStore } from "@/lib/store";
+import { getCharacter } from "@/lib/characters";
+import { yen, typeFromProfile } from "@/lib/negotiation";
 
 interface SearchItem {
   id: string;
@@ -50,6 +53,8 @@ interface Props {
 }
 
 export function SearchScreen({ unread, onBack, onOpenProduct, onBell, onMypage }: Props) {
+  const persona = useStore((s) => s.persona);
+  const myCharacter = getCharacter(typeFromProfile(persona).type);
   const [step, setStep] = useState<"grid" | "bulk">("grid");
   // 既定で全商品にチェック（デモをすぐ流せるように）
   const [checked, setChecked] = useState<Set<string>>(() => new Set(ITEMS.map((i) => i.id)));
@@ -184,13 +189,8 @@ export function SearchScreen({ unread, onBack, onOpenProduct, onBell, onMypage }
             </div>
           </div>
 
-          <button className="bulk-cta" onClick={startBulk}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <rect x="4" y="8" width="16" height="11" rx="3" stroke="#fff" strokeWidth="1.8" />
-              <path d="M12 8V4M9 4h6" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" />
-              <circle cx="9" cy="13.5" r="1.3" fill="#fff" />
-              <circle cx="15" cy="13.5" r="1.3" fill="#fff" />
-            </svg>
+          <button className="btn btn-fill bulk-cta" onClick={startBulk}>
+            <CharacterAvatar character={myCharacter} fallbackEmoji={myCharacter.emoji} size="chat" decorative />
             まとめてAIに値下げ交渉させる
             {selected.length > 0 && <span className="bulk-count">{selected.length}</span>}
           </button>
