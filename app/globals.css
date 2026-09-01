@@ -645,3 +645,15 @@ button:focus-visible, input:focus-visible, [role="button"]:focus-visible{
 }
 
 .bdone{ flex:none; font-size:13px; font-weight:700; color:var(--gray-1); padding:9px 6px; }
+
+@media (max-width:430px){
+  .pw-header{ padding-top:4px; padding-bottom:6px; }
+  .photo-inner img{ aspect-ratio:1; object-fit:cover; }
+  .react-row{ padding-bottom:8px; }
+  .react-ic{ width:40px; height:40px; }
+  .p-title{ margin-bottom:6px; }
+  .p-tags{ margin-bottom:8px; }
+  .p-time{ margin-bottom:8px; }
+  .gname{ -webkit-line-clamp:1; line-height:1.2; padding:3px 6px 2px; }
+  .bulk-cta{ bottom:calc(72px + env(safe-area-inset-bottom)); min-height:44px; padding:0 15px; }
+}
