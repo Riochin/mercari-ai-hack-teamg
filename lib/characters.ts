@@ -205,6 +205,3 @@ export const CHARACTERS: Record<PersonaType, CharacterMeta> = {
 export function getCharacter(type: PersonaType): CharacterMeta {
   return CHARACTERS[type];
 }
-
-// 出品者AIはチャット上、常にこのキャラクターで固定表示する（絵文字アイコンは廃止）
-export const SELLER_CHARACTER: CharacterMeta = CHARACTERS.elegant_closer;

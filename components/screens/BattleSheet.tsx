@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { PriceRequestSheet, type PriceReq } from "../PriceRequestSheet";
 import { CharacterAvatar } from "../CharacterAvatar";
 import { useStore, makeSessionId } from "@/lib/store";
-import { getCharacter, SELLER_CHARACTER } from "@/lib/characters";
+import { getCharacter } from "@/lib/characters";
 import {
   generateTurns,
   typeFromProfile,
@@ -456,7 +456,7 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
                         size="chat"
                       />
                     ) : (
-                      <CharacterAvatar character={SELLER_CHARACTER} fallbackEmoji={SELLER_CHARACTER.emoji} size="chat" />
+                      <span className="bavatar">{lt.turn.emoji || "🙂"}</span>
                     )}
                     {lt.typing ? (
                       <div className={"bubble typing" + (lt.paused ? " paused" : "")}>
@@ -502,7 +502,7 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
                 {result.status === "agreed" ? (
                   requested ? (
                     <button className="confirm-btn" onClick={onGoNotify}>
-                      やることリストを見る ›
+                      お知らせ（出品者）を見る ›
                     </button>
                   ) : (
                     <button

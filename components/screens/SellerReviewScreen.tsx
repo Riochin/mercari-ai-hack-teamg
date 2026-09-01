@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { BackChevron, Chevron } from "../icons";
-import { StatusBar, BottomNav } from "../PhoneChrome";
 import { ChatBubble } from "../ChatBubble";
 import { CharacterAvatar } from "../CharacterAvatar";
 import { useStore } from "@/lib/store";
@@ -13,12 +12,9 @@ import { getCharacter } from "@/lib/characters";
 interface Props {
   sessionId: string;
   onBack: () => void;
-  unread: number;
-  onBell: () => void;
-  onMypage: () => void;
 }
 
-export function SellerReviewScreen({ sessionId, onBack, unread, onBell, onMypage }: Props) {
+export function SellerReviewScreen({ sessionId, onBack }: Props) {
   const session = useStore((s) => s.sessions.find((x) => x.sessionId === sessionId));
   const notifications = useStore((s) => s.notifications);
   const setSessionStatus = useStore((s) => s.setSessionStatus);
@@ -36,13 +32,11 @@ export function SellerReviewScreen({ sessionId, onBack, unread, onBell, onMypage
   if (!session) {
     return (
       <div className="screen profile-screen">
-        <StatusBar />
         <div className="sheet-header">
           <BackChevron onClick={onBack} />
           <span className="title">合意額の確認</span>
         </div>
         <div className="notif-empty">この交渉は見つかりませんでした。</div>
-        <BottomNav active="bell" unread={unread} onBell={onBell} onMypage={onMypage} />
       </div>
     );
   }
@@ -61,7 +55,6 @@ export function SellerReviewScreen({ sessionId, onBack, unread, onBell, onMypage
     const done = session.status === "completed";
     return (
       <div className="screen profile-screen">
-        <StatusBar />
         <div className="sheet-header">
           <BackChevron onClick={onBack} />
           <span className="title">{done ? "取引成立" : "見送り"}</span>
@@ -76,17 +69,15 @@ export function SellerReviewScreen({ sessionId, onBack, unread, onBell, onMypage
               : `「${session.item.name}」の今回の合意は見送りとなりました。`}
           </div>
           <button className="o-back" onClick={onBack}>
-            やることリストに戻る
+            お知らせに戻る
           </button>
         </div>
-        <BottomNav active="bell" unread={unread} onBell={onBell} onMypage={onMypage} />
       </div>
     );
   }
 
   return (
     <div className="screen profile-screen">
-      <StatusBar />
       <div className="sheet-header">
         <BackChevron onClick={onBack} />
         <span className="title">合意額の確認</span>
@@ -186,7 +177,6 @@ export function SellerReviewScreen({ sessionId, onBack, unread, onBell, onMypage
         )}
 
       </div>
-      <BottomNav active="bell" unread={unread} onBell={onBell} onMypage={onMypage} />
     </div>
   );
 }

@@ -48,25 +48,25 @@ export const NavIcons: Record<string, (active: boolean) => JSX.Element> = {
   ),
   bell: (a) => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path
-        d="M12 20s-7-4.4-9.5-9C.8 7.2 2.6 4 6 4c2 0 3.5 1.1 4.3 2.4 0 0 .5.9.7 1.3.2-.4.7-1.3.7-1.3C12.5 5.1 14 4 16 4c3.4 0 5.2 3.2 3.5 7-2.5 4.6-9.5 9-9.5 9z"
-        stroke={c(a)}
-        strokeWidth="1.7"
-      />
+      <path d="M12 3a5 5 0 00-5 5v3.5L5 15h14l-2-3.5V8a5 5 0 00-5-5z" stroke={c(a)} strokeWidth="1.7" />
+      <path d="M10 18a2 2 0 004 0" stroke={c(a)} strokeWidth="1.7" />
     </svg>
   ),
   pay: (a) => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <rect x="12.3" y="3.3" width="4" height="7.6" rx="1" transform="rotate(45 14.3 7.1)" stroke={c(a)} strokeWidth="1.6" />
-      <path d="M9.5 10.5L4 16" stroke={c(a)} strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M4 20h7" stroke={c(a)} strokeWidth="1.7" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="9" stroke={c(a)} strokeWidth="1.7" />
+      <path
+        d="M12 7v10M9 9.5c0-1.4 1.3-2 3-2s3 .8 3 2-1.3 1.8-3 2-3 .8-3 2 1.3 2 3 2 3-.6 3-2"
+        stroke={c(a)}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
     </svg>
   ),
   mypage: (a) => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="6" width="18" height="13" rx="2.5" stroke={c(a)} strokeWidth="1.7" />
-      <path d="M3 10.5h18" stroke={c(a)} strokeWidth="1.7" />
-      <circle cx="16.5" cy="14.5" r="1.3" fill={c(a)} />
+      <circle cx="12" cy="8" r="3.5" stroke={c(a)} strokeWidth="1.7" />
+      <path d="M5 20c1-3.5 4-5.5 7-5.5s6 2 7 5.5" stroke={c(a)} strokeWidth="1.7" strokeLinecap="round" />
     </svg>
   ),
   sell: (a) => (
