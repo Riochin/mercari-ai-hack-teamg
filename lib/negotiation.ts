@@ -149,6 +149,9 @@ export interface BattleParams {
   isRematch?: boolean;
 }
 
+// デモで毎回結果が変わらないよう、1回目は決裂・2回目は成立…と固定で交互に切り替える
+let negotiationAttempt = 0;
+
 // ダミーの交渉生成：粘り強さ・話し方・出品者の頑固さから、それらしいターン列を作る
 export function generateTurns(params: BattleParams): GeneratedNegotiation {
   const { askPrice, sellerMin, sellerStub, buyerWant, persist, politeness } =
@@ -169,7 +172,8 @@ export function generateTurns(params: BattleParams): GeneratedNegotiation {
     { msg: "早めに手放したいので、ここまでなら", emoji: "😅", tension: 0.2 },
   ];
   const buyerLines = buyerLinePool(length, politeness);
-  const willAgree = Math.random() < 0.45 + persistPct / 250;
+  negotiationAttempt += 1;
+  const willAgree = negotiationAttempt % 2 === 0; // 奇数回目=決裂、偶数回目=成立
 
   for (let i = 0; i < turnsCount; i++) {
     const speaker: "buyer" | "seller" = i % 2 === 0 ? "buyer" : "seller";

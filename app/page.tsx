@@ -50,7 +50,14 @@ export default function Home() {
                 />
               )}
 
-              {view === "profile" && <ProfileScreen onBack={() => setView("product")} />}
+              {view === "profile" && (
+                <ProfileScreen
+                  onBack={() => setView("product")}
+                  unread={unread}
+                  onBell={() => setView("notify")}
+                  onMypage={() => setView("profile")}
+                />
+              )}
 
               {view === "notify" && (
                 <SellerNotifyScreen
@@ -59,11 +66,20 @@ export default function Home() {
                     setReviewSessionId(id);
                     setView("review");
                   }}
+                  unread={unread}
+                  onBell={() => setView("notify")}
+                  onMypage={() => setView("profile")}
                 />
               )}
 
               {view === "review" && reviewSessionId && (
-                <SellerReviewScreen sessionId={reviewSessionId} onBack={() => setView("notify")} />
+                <SellerReviewScreen
+                  sessionId={reviewSessionId}
+                  onBack={() => setView("notify")}
+                  unread={unread}
+                  onBell={() => setView("notify")}
+                  onMypage={() => setView("profile")}
+                />
               )}
 
               <BattleSheet
