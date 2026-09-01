@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { PriceRequestSheet, type PriceReq } from "../PriceRequestSheet";
 import { CharacterAvatar } from "../CharacterAvatar";
 import { useStore, makeSessionId } from "@/lib/store";
-import { findCharacter } from "@/lib/characters";
+import { getCharacter } from "@/lib/characters";
 import {
   generateTurns,
   typeFromProfile,
@@ -42,11 +42,10 @@ interface Props {
 
 export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props) {
   const persona = useStore((s) => s.persona);
-  const characterId = useStore((s) => s.characterId);
   const characterName = useStore((s) => s.characterName);
   const requestPurchase = useStore((s) => s.requestPurchase);
   const meta = typeFromProfile(persona);
-  const character = findCharacter(meta.type, characterId);
+  const character = getCharacter(meta.type);
   const buyerAiName = characterName?.trim() || "あなたのAI";
 
   const [step, setStep] = useState<"setup" | "battle">("setup");
@@ -282,7 +281,6 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
         name: "ゲスト太郎",
         want: buyerWant,
         persona,
-        characterId,
         characterName: characterName?.trim() || null,
       },
       seller: { minPrice: SELLER_MIN, stubbornness: SELLER_STUB },

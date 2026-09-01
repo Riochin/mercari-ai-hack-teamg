@@ -4,7 +4,7 @@ import type { PersonaProfile, PersonaType, Turn } from "./types";
 
 export const MAX_TURN = 5;
 
-// ---- 4タイプ判定（仕様書 4.1）----
+// ---- 16タイプ判定（仕様書 4.1 の4象限を、押し/丁寧さそれぞれ4段階に細分化）----
 interface TypeMeta {
   type: PersonaType;
   avatar: string;
@@ -12,39 +12,50 @@ interface TypeMeta {
   desc: string;
 }
 
+// 1-7 の平均点を4段階に振り分ける。4はちょうど band1（低め側）に入るようにして、
+// 「未診断時=4,4」が旧仕様の mypace 象限に近い場所へ落ちるようにしている。
+function bandOf(score: number): 0 | 1 | 2 | 3 {
+  if (score <= 2.5) return 0;
+  if (score <= 4) return 1;
+  if (score <= 5.5) return 2;
+  return 3;
+}
+
+// 行 = persist band（0:あっさり 〜 3:とことん粘る）
+// 列 = politeness band（0:フランク 〜 3:徹底したですます調）
+// 四隅（[0][0] [0][3] [3][0] [3][3]）は仕様書4.1の4タイプをそのまま極端値として残す。
+const TYPE_GRID: TypeMeta[][] = [
+  [
+    { type: "mypace", avatar: "😌", name: "脱力仙人タイプ", desc: "勝ち負けなんて、気にしない。その抜けた力こそが、実はいちばんの武器だったりする。" },
+    { type: "cool_dodger", avatar: "😎", name: "クールスルータイプ", desc: "掴もうとすると、するりと躱される。本気なのか気まぐれなのか、最後までつかめない。" },
+    { type: "quiet_retreat", avatar: "🍃", name: "ひそやか撤退タイプ", desc: "無理はしない、それが一番の礼儀だと思っている。引き際の潔さに、なぜか好感が持てる。" },
+    { type: "listener", avatar: "🕊️", name: "共感モンスタータイプ", desc: "相手の気持ちを、まるごと飲み込むように聞く。気づけば、心を開いているのはあなたの方かも。" },
+  ],
+  [
+    { type: "mood_trader", avatar: "🎲", name: "気分屋トレーダータイプ", desc: "その日の気分で強さが変わる、読めないタイプ。運が良ければ、思わぬ好条件を引き出してくる。" },
+    { type: "steady_merchant", avatar: "🛍️", name: "マイペース商人タイプ", desc: "焦らず、騒がず、自分のペースで淡々と進める。気づけば、いつの間にか話がまとまっている。" },
+    { type: "soft_pressure", avatar: "☁️", name: "ふんわり交渉人タイプ", desc: "強く言わないのに、なぜか断りづらい。やわらかい圧、とでも呼ぶべき独特の存在感。" },
+    { type: "quiet_support", avatar: "🌙", name: "静かな伴走者タイプ", desc: "前には出ないが、隣からそっと支える。気づけば、いちばん頼りにしているのはこの人だったりする。" },
+  ],
+  [
+    { type: "straight_shooter", avatar: "⚾", name: "直球勝負タイプ", desc: "駆け引きより、まっすぐ本音でぶつかる。不器用なほどの正直さが、意外と信頼を生む。" },
+    { type: "slow_grinder", avatar: "🐢", name: "じわじわ圧タイプ", desc: "急がず、しかし止まらない。気づいたときには、じりじりと押し切られている。" },
+    { type: "firm_charmer", avatar: "🌸", name: "芯の通った交渉人タイプ", desc: "物腰はやわらかいのに、譲れない一線だけは絶対に動かさない。そのギャップに、思わず一目置いてしまう。" },
+    { type: "elegant_closer", avatar: "🎩", name: "上品な仕留め人タイプ", desc: "終始にこやかなのに、気づけば望みどおりの結果に着地している。一番怖いのは、たぶんこのタイプ。" },
+  ],
+  [
+    { type: "hot_blooded", avatar: "😤", name: "猪突猛進タイプ", desc: "考えるより先に、体が動く。まっすぐすぎるその勢いが、意外と相手の心を動かす。" },
+    { type: "fierce_dealer", avatar: "🔥", name: "本気ディーラータイプ", desc: "駆け引き上等、根競べ大歓迎。長引くほど燃えてくる、根っからの勝負師タイプ。" },
+    { type: "sweet_persistence", avatar: "🍯", name: "粘り上手タイプ", desc: "しつこいはずなのに、なぜか嫌われない。粘りと愛嬌のバランス感覚が抜群な、交渉のプロ。" },
+    { type: "gentleman", avatar: "🤵", name: "微笑み外交官タイプ", desc: "笑顔を絶やさず、じわじわ包囲網を狭めていく。気づいたときには、もう逃げ場がない。" },
+  ],
+];
+
 export function typeFromProfile(p: {
   persist: number;
   politeness: number;
 }): TypeMeta {
-  const pushHigh = p.persist > 4;
-  const politeHigh = p.politeness > 4;
-  if (pushHigh && politeHigh)
-    return {
-      type: "gentleman",
-      avatar: "🤵",
-      name: "微笑み外交官タイプ",
-      desc: "笑顔を絶やさず、じわじわ包囲網を狭めていく。気づいたときには、もう逃げ場がない。",
-    };
-  if (pushHigh && !politeHigh)
-    return {
-      type: "hot_blooded",
-      avatar: "😤",
-      name: "猪突猛進タイプ",
-      desc: "考えるより先に、体が動く。まっすぐすぎるその勢いが、意外と相手の心を動かす。",
-    };
-  if (!pushHigh && politeHigh)
-    return {
-      type: "listener",
-      avatar: "🕊️",
-      name: "共感モンスタータイプ",
-      desc: "相手の気持ちを、まるごと飲み込むように聞く。気づけば、心を開いているのはあなたの方かも。",
-    };
-  return {
-    type: "mypace",
-    avatar: "😌",
-    name: "脱力仙人タイプ",
-    desc: "勝ち負けなんて、気にしない。その抜けた力こそが、実はいちばんの武器だったりする。",
-  };
+  return TYPE_GRID[bandOf(p.persist)][bandOf(p.politeness)];
 }
 
 export function buildPersona(persist: number, politeness: number): PersonaProfile {
@@ -58,7 +69,7 @@ export function buildPersona(persist: number, politeness: number): PersonaProfil
   };
 }
 
-export const DEFAULT_PERSONA: PersonaProfile = buildPersona(4, 4); // 未診断時 = mypace
+export const DEFAULT_PERSONA: PersonaProfile = buildPersona(4, 4); // 未診断時 = steady_merchant（マイペース商人タイプ）
 
 // ---- 購入者のセリフ候補（話し方の長さ×丁寧さ）----
 interface Line {

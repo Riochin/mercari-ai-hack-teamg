@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { TraitScale } from "../TraitScale";
 import { BackChevron } from "../icons";
 import { useStore } from "@/lib/store";
 import { buildPersona, typeFromProfile } from "@/lib/negotiation";
-import { findCharacter, pickCharacter } from "@/lib/characters";
+import { getCharacter } from "@/lib/characters";
 
 // axis: "persist" = 押しの強さ、"politeness" = 話し方・丁寧さ（PersonaProfileの2軸に対応）
-// flavor: 押し/丁寧さのスコアには使わず、相棒キャラクターを1体に絞り込むためだけに使う
-type Axis = "persist" | "politeness" | "flavor";
+// この2軸をそれぞれ4段階に分けることで、16タイプのうちどれかが一意に決まる。
+type Axis = "persist" | "politeness";
 interface Question {
   axis: Axis;
   name: string;
@@ -17,7 +17,7 @@ interface Question {
   right: string;
 }
 
-// 読みやすいように「押しの強さ」→「話し方・伝え方」→「キャラクターのこだわり」の3グループで並べる
+// 読みやすいように「押しの強さ」→「話し方・伝え方」の2グループで並べる
 const QUESTION_GROUPS: { heading: string; items: Question[] }[] = [
   {
     heading: "押しの強さについて",
@@ -33,14 +33,6 @@ const QUESTION_GROUPS: { heading: string; items: Question[] }[] = [
       { axis: "politeness", name: "話し方は", left: "フランク", right: "ですます調" },
       { axis: "politeness", name: "言葉選びは", left: "ハキハキ\n主張する", right: "下手に出るくらいが\nちょうどいい" },
       { axis: "politeness", name: "交渉のスタンスは", left: "自分の要望を\n素直に伝えたい", right: "相手の事情も\n汲みたい" },
-    ],
-  },
-  {
-    heading: "キャラクターのこだわり",
-    items: [
-      { axis: "flavor", name: "交渉の始め方は", left: "いきなり\n本題に入る", right: "世間話から\nじわじわ攻める" },
-      { axis: "flavor", name: "武器にするのは", left: "相場データで\n押し切る", right: "気持ちや誠意で\n訴える" },
-      { axis: "flavor", name: "200円引きクーポンを\n使い忘れたら", left: "まあいいか", right: "一日引きずる" },
     ],
   },
 ];
@@ -61,7 +53,6 @@ const average = (nums: number[]) => nums.reduce((a, b) => a + b, 0) / nums.lengt
 export function ProfileScreen({ onBack }: { onBack: () => void }) {
   const persona = useStore((s) => s.persona);
   const diagnosed = useStore((s) => s.diagnosed);
-  const characterId = useStore((s) => s.characterId);
   const characterName = useStore((s) => s.characterName);
   const setPersona = useStore((s) => s.setPersona);
   const setCharacterName = useStore((s) => s.setCharacterName);
@@ -73,10 +64,7 @@ export function ProfileScreen({ onBack }: { onBack: () => void }) {
   const [renaming, setRenaming] = useState(false);
 
   const meta = typeFromProfile(persona);
-  const character = useMemo(
-    () => findCharacter(meta.type, characterId) ?? pickCharacter(meta.type, 4),
-    [meta.type, characterId],
-  );
+  const character = getCharacter(meta.type);
 
   // quiz(未診断) → revealed(診断済み。名づけ欄は名前の有無で出し分け)
   const stage: "quiz" | "revealed" = diagnosed ? "revealed" : "quiz";
@@ -88,10 +76,8 @@ export function ProfileScreen({ onBack }: { onBack: () => void }) {
   const submit = () => {
     const scoreOf = (axis: Axis) => average(ALL_QUESTIONS.filter((q) => q.axis === axis).map((q) => answers[q.name]));
     const nextPersona = buildPersona(scoreOf("persist"), scoreOf("politeness"));
-    const nextType = typeFromProfile(nextPersona).type;
-    const nextCharacter = pickCharacter(nextType, scoreOf("flavor"));
 
-    setPersona(nextPersona, nextCharacter.id);
+    setPersona(nextPersona);
     setNameInput("");
   };
 
@@ -138,11 +124,10 @@ export function ProfileScreen({ onBack }: { onBack: () => void }) {
                 <div className="persona-character-fallback is-hidden">{character.emoji}</div>
               </div>
 
+              <div className="persona-catchphrase">{character.catchphrase}</div>
+
               <div className="type-name">{meta.name}</div>
               <div className="type-desc">{meta.desc}</div>
-
-              <div className="persona-catchphrase">{character.catchphrase}</div>
-              <div className="persona-description">{character.description}</div>
 
               <div className="persona-first-line">
                 <div className="pfl-label">はじめての一言</div>
@@ -166,7 +151,9 @@ export function ProfileScreen({ onBack }: { onBack: () => void }) {
               {!characterName || renaming ? (
                 <div className="naming-block">
                   <div className="naming-intro">
-                    このAIと、これから何度も一緒に交渉することになります。
+                    このAIと、
+                    <br />
+                    これから何度も一緒に交渉することになります。
                     <br />
                     名前をつけて、あなただけの相棒にしましょう。
                   </div>
@@ -186,7 +173,7 @@ export function ProfileScreen({ onBack }: { onBack: () => void }) {
                       setNameInput(randomOf(pool.length > 0 ? pool : character.nameSuggestions));
                     }}
                   >
-                    🎲 おまかせで名づける🔄
+                    おまかせで名づける
                   </button>
                   <button className="start-btn" onClick={confirmName} disabled={!nameInput.trim()}>
                     この名前にする
@@ -216,7 +203,7 @@ export function ProfileScreen({ onBack }: { onBack: () => void }) {
             </div>
 
             <button className="omakase-fill-btn" type="button" onClick={fillAllRandomly}>
-              🎲 質問を全部お任せで埋める
+              質問を全部お任せで埋める
             </button>
 
             {QUESTION_GROUPS.map((group) => (

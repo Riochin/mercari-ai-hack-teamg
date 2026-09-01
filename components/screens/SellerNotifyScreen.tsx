@@ -4,7 +4,7 @@ import Image from "next/image";
 import { BackChevron } from "../icons";
 import { CharacterAvatar } from "../CharacterAvatar";
 import { useStore } from "@/lib/store";
-import { findCharacter } from "@/lib/characters";
+import { getCharacter } from "@/lib/characters";
 import { yen } from "@/lib/negotiation";
 
 function timeAgo(iso: string) {
@@ -47,7 +47,7 @@ export function SellerNotifyScreen({ onBack, onOpenReview }: Props) {
               const session = sessions.find((s) => s.sessionId === n.sessionId);
               const photo = session?.item.photo ?? "/dorodango.png";
               const buyerCharacter = session
-                ? findCharacter(session.buyer.persona.type, session.buyer.characterId)
+                ? getCharacter(session.buyer.persona.type)
                 : null;
               return (
                 <button className="notif-item" type="button" key={n.notificationId} onClick={() => onOpenReview(n.sessionId)}>

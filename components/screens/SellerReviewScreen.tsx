@@ -7,7 +7,7 @@ import { ChatBubble } from "../ChatBubble";
 import { CharacterAvatar } from "../CharacterAvatar";
 import { useStore } from "@/lib/store";
 import { yen } from "@/lib/negotiation";
-import { findCharacter } from "@/lib/characters";
+import { getCharacter } from "@/lib/characters";
 
 interface Props {
   sessionId: string;
@@ -46,7 +46,7 @@ export function SellerReviewScreen({ sessionId, onBack }: Props) {
   const minPrice = session.seller.minPrice;
   const discount = listPrice - finalPrice;
   const aboveMin = finalPrice >= minPrice;
-  const buyerCharacter = findCharacter(session.buyer.persona.type, session.buyer.characterId);
+  const buyerCharacter = getCharacter(session.buyer.persona.type);
   const buyerAiName = session.buyer.characterName?.trim() || "購入者AI";
   const minDelta = finalPrice - minPrice;
 

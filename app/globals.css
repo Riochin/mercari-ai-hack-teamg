@@ -287,6 +287,7 @@ body{
 .type-desc{ font-size:11.5px; color:var(--gray-1); line-height:1.5; margin-bottom:16px; }
 .retake-btn{ background:#fff; border:1.5px solid var(--ink); color:var(--ink); padding:9px 18px; border-radius:20px; font-size:12.5px; font-weight:700; cursor:pointer; }
 
+/* 診断アンケート：3グループの見出し（押しの強さ／話し方・伝え方／キャラクターのこだわり） */
 .quiz-section-heading{
   display:flex; align-items:center; gap:10px; margin:18px 0 14px; font-size:11px; color:var(--gray-1);
 }
@@ -298,6 +299,7 @@ body{
   padding:10px; border-radius:10px; font-size:12.5px; font-weight:700; cursor:pointer; margin-bottom:6px;
 }
 
+/* 診断結果：相棒キャラクター（任意の追加質問から1体を選出、最後にユーザーが名づける） */
 .persona-character{
   background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px 16px; margin-bottom:14px;
 }
@@ -305,11 +307,15 @@ body{
   width:112px; height:112px; margin:0 auto 12px; border-radius:50%; background:var(--bg-gray);
   display:flex; align-items:center; justify-content:center; overflow:hidden;
 }
-.persona-character-img{ width:100%; height:100%; object-fit:cover; transform:scale(1.55); }
+.persona-character-img{ width:100%; height:100%; object-fit:cover; }
 .persona-character-fallback{ font-size:50px; line-height:1; }
 .persona-character-fallback.is-hidden{ display:none; }
-.persona-catchphrase{ font-size:12.5px; font-weight:700; color:var(--blue); margin-bottom:10px; }
-.persona-description{ font-size:12px; color:var(--gray-1); line-height:1.7; text-align:left; margin-bottom:16px; }
+
+.persona-catchphrase{
+  font-size:15px; font-weight:900; color:var(--blue); line-height:1.4; margin-bottom:8px;
+  white-space:nowrap;
+}
+
 .persona-first-line{
   background:var(--bg-gray); border-radius:10px; padding:12px 8px 14px; margin-bottom:16px; text-align:left;
 }
@@ -317,19 +323,24 @@ body{
 .persona-first-line .bubble{
   background:#fff; color:var(--ink); border-bottom-left-radius:4px; padding:9px 10px; max-width:80%;
 }
+
+/* はじめての一言：キャラクター画像を丸アイコンで表示（.bavatar と同じ列に並ぶ） */
 .bavatar-img{
   width:28px; height:28px; border-radius:50%; overflow:hidden; flex:none;
   background:var(--bg-gray); display:flex; align-items:center; justify-content:center;
 }
-.bavatar-img img{ width:100%; height:100%; object-fit:cover; transform:scale(1.55); }
+.bavatar-img img{ width:100%; height:100%; object-fit:cover; }
 .bavatar-fallback{ font-size:16px; line-height:1; }
 .bavatar-fallback.is-hidden{ display:none; }
+
 .naming-block{ border-top:1px dashed var(--line); padding-top:16px; }
 .persona-character-name{ font-size:19px; font-weight:900; color:var(--ink); margin-bottom:8px; }
 .rename-link{
   background:none; border:none; font-size:11px; color:var(--gray-1); text-decoration:underline;
   cursor:pointer; padding:2px;
 }
+
+/* 命名ステップ */
 .naming-intro{ font-size:12px; color:var(--gray-1); line-height:1.6; margin-bottom:16px; }
 .character-name-input{
   width:100%; text-align:center; border:1px solid var(--line); border-radius:8px; padding:10px 12px;
@@ -419,7 +430,7 @@ body{
 }
 .character-avatar.mini{ width:32px; height:32px; }
 .character-avatar.chat{ width:28px; height:28px; }
-.character-avatar img{ width:100%; height:100%; object-fit:cover; display:block; transform:scale(1.55); }
+.character-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
 .bubble{ max-width:74%; padding:9px 12px; border-radius:16px; font-size:13.5px; line-height:1.4; }
 .bubble-row.seller .bubble{ background:var(--bg-gray); color:var(--ink); border-bottom-left-radius:4px; }
 .bubble-row.buyer .bubble{ background:var(--blue); color:#fff; border-bottom-right-radius:4px; }
