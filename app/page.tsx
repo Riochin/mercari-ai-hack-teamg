@@ -33,6 +33,7 @@ export default function Home() {
             <>
               <ProductScreen
                 unread={unread}
+                active={view === "product" && !battleOpen}
                 onOpenBattle={() => setBattleOpen(true)}
                 onOpenSearch={() => setView("search")}
                 onBell={() => setView("notify")}

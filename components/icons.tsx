@@ -1,19 +1,19 @@
 // プロトタイプ由来の SVG アイコン群（同じパス・同じ色を踏襲）
 import type { JSX } from "react";
 
-export const BackChevron = (props: { onClick?: () => void; className?: string }) => (
-  <svg
-    onClick={props.onClick}
-    className={props.className}
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    style={props.onClick ? { cursor: "pointer" } : undefined}
-  >
-    <path d="M15 5l-7 7 7 7" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
+export const BackChevron = (props: { onClick?: () => void; className?: string }) => {
+  const icon = (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M15 5l-7 7 7 7" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+  if (!props.onClick) return icon;
+  return (
+    <button type="button" className={`icon-button ${props.className ?? ""}`} onClick={props.onClick} aria-label="戻る">
+      {icon}
+    </button>
+  );
+};
 
 export const StatusIcons = () => (
   <span className="icons">
