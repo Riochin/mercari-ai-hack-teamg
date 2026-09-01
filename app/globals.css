@@ -521,6 +521,7 @@ button:focus-visible, input:focus-visible, [role="button"]:focus-visible{
   width:100%; display:flex; gap:12px; padding:14px 16px; border:0; border-bottom:1px solid var(--line);
   background:#fff; color:inherit; text-align:left; font:inherit; cursor:pointer; align-items:flex-start;
 }
+.notif-item.mock{ cursor:default; }
 .notif-item .thumb{ width:48px; height:48px; border-radius:8px; object-fit:cover; flex:none; }
 .notif-item .n-body{ flex:1; min-width:0; }
 .notif-item .n-title{ font-size:13px; font-weight:700; color:var(--ink); margin-bottom:3px; display:flex; align-items:center; gap:6px; }
