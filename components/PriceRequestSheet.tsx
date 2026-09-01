@@ -42,15 +42,22 @@ export function PriceRequestSheet({ req, onClose }: { req: PriceReq | null; onCl
 
   return (
     <>
-      <div className={"sheet-backdrop" + (open ? " open" : "")} style={{ zIndex: 39 }} onClick={onClose} />
-      <div className={"sheet pr-sheet" + (open ? " open" : "")}>
+      <div className={"sheet-backdrop" + (open ? " open" : "")} style={{ zIndex: 39 }} onClick={onClose} aria-hidden="true" />
+      <div
+        className={"sheet pr-sheet" + (open ? " open" : "")}
+        role={open ? "dialog" : undefined}
+        aria-modal={open ? true : undefined}
+        aria-hidden={!open}
+        inert={!open ? true : undefined}
+        aria-labelledby={open ? "price-request-title" : undefined}
+      >
         <div className="pr-header">
-          <button className="sheet-close" onClick={onClose} aria-label="閉じる">
+          <button className="sheet-close" type="button" onClick={onClose} aria-label="閉じる">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M6 6l12 12M18 6L6 18" stroke="#222" strokeWidth="2.2" strokeLinecap="round" />
             </svg>
           </button>
-          <span className="title">値下げを依頼する</span>
+          <span className="title" id="price-request-title">値下げを依頼する</span>
         </div>
 
         {req && (
@@ -75,7 +82,7 @@ export function PriceRequestSheet({ req, onClose }: { req: PriceReq | null; onCl
               <div className="pr-thumb">
                 {req.photo ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={req.photo} alt={req.name} />
+                  <img src={req.photo} alt={req.name} width="64" height="64" />
                 ) : req.noimage ? (
                   <div className="pr-thumb-noimg">NO<br />IMAGE</div>
                 ) : (
@@ -93,23 +100,28 @@ export function PriceRequestSheet({ req, onClose }: { req: PriceReq | null; onCl
             <div className="pr-divider" />
 
             <div className="pr-field-row">
-              <span className="pr-field-label">希望価格</span>
+              <label className="pr-field-label" htmlFor="price-request-value">希望価格</label>
               {pristine && <span className="pr-ai-note">AIが見つけた合意額です</span>}
             </div>
             <div className={"pr-input" + (pristine ? " ai" : "")}>
               <span className="pr-yen">¥</span>
               <input
+                id="price-request-value"
+                name="price-request-value"
                 type="number"
+                inputMode="numeric"
+                autoComplete="off"
+                aria-describedby="price-request-range"
                 value={price}
                 step={10}
                 onChange={(e) => setPrice(Number(e.target.value))}
               />
             </div>
-            <div className="pr-range">
+            <div className="pr-range" id="price-request-range">
               希望できる価格は{yen(lo)} - {yen(hi)}です
             </div>
 
-            <button className="pr-submit" onClick={submit}>
+            <button className="pr-submit" type="button" onClick={submit}>
               値下げを依頼する
             </button>
           </div>

@@ -4,24 +4,25 @@ import { RobotIcon } from "../icons";
 
 interface Props {
   unread: number;
+  active: boolean;
   onOpenBattle: () => void;
   onOpenSearch: () => void;
   onBell: () => void;
   onMypage: () => void;
 }
 
-export function ProductScreen({ unread, onOpenBattle, onOpenSearch, onBell, onMypage }: Props) {
+export function ProductScreen({ unread, active, onOpenBattle, onOpenSearch, onBell, onMypage }: Props) {
   return (
-    <div className="screen">
+    <div className="screen" aria-hidden={!active} inert={!active ? true : undefined}>
       <div className="content">
         <StatusBar />
 
         <div className="pw-header">
-          <div className="pw-btn back" onClick={onOpenSearch}>
+          <button className="pw-btn back" type="button" onClick={onOpenSearch} aria-label="検索結果へ戻る">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
               <path d="M15 5l-7 7 7 7" stroke="#222" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-          </div>
+          </button>
           <div className="pw-btn menu">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="#222">
               <circle cx="12" cy="5" r="1.9" />
@@ -116,10 +117,10 @@ export function ProductScreen({ unread, onOpenBattle, onOpenSearch, onBell, onMy
             <span className="mercard-more">詳細</span>
           </div>
 
-          <div className="ai-cta" onClick={onOpenBattle}>
+          <button className="ai-cta" type="button" onClick={onOpenBattle}>
             <RobotIcon />
             <span>AIにおまかせで値下げ交渉</span>
-          </div>
+          </button>
 
           <div className="p-desc">
             <div className="p-desc-h">商品の説明</div>
@@ -132,8 +133,8 @@ export function ProductScreen({ unread, onOpenBattle, onOpenSearch, onBell, onMy
       </div>
 
       <div className="buy-bar">
-        <div className="btn btn-outline">翌月払い</div>
-        <div className="btn btn-fill">購入へ</div>
+        <button className="btn btn-outline" type="button">翌月払い</button>
+        <button className="btn btn-fill" type="button">購入へ</button>
       </div>
 
       <BottomNav active="home" unread={unread} onBell={onBell} onMypage={onMypage} />

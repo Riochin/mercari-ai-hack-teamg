@@ -44,7 +44,7 @@ export function SellerNotifyScreen({ onBack, onOpenReview }: Props) {
               const session = sessions.find((s) => s.sessionId === n.sessionId);
               const photo = session?.item.photo ?? "/dorodango.png";
               return (
-                <div className="notif-item" key={n.notificationId} onClick={() => onOpenReview(n.sessionId)}>
+                <button className="notif-item" type="button" key={n.notificationId} onClick={() => onOpenReview(n.sessionId)}>
                   <Image className="thumb" src={photo} alt="" width={48} height={48} />
                   <div className="n-body">
                     <div className="n-title">
@@ -54,7 +54,7 @@ export function SellerNotifyScreen({ onBack, onOpenReview }: Props) {
                     <div className="n-text">{n.body}</div>
                     <div className="n-time">{timeAgo(n.createdAt)}</div>
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>

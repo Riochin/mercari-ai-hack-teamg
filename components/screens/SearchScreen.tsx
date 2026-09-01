@@ -91,6 +91,7 @@ export function SearchScreen({ unread, onBack, onOpenProduct, onBell, onMypage }
 
   return (
     <div className="screen">
+      <div className="search-base" aria-hidden={!!priceReq} inert={priceReq ? true : undefined}>
       {step === "grid" ? (
         <>
           <div className="content">
@@ -287,6 +288,7 @@ export function SearchScreen({ unread, onBack, onOpenProduct, onBell, onMypage }
           <BottomNav active="home" unread={unread} onBell={onBell} onMypage={onMypage} />
         </>
       )}
+      </div>
 
       <PriceRequestSheet req={priceReq} onClose={() => setPriceReq(null)} />
     </div>

@@ -70,12 +70,29 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
     if (open) {
       setStep("setup");
       setErr("");
+    } else {
+      runId.current++;
+      setRunning(false);
+      setLoading(false);
+      setPriceReq(null);
     }
   }, [open]);
 
   const scrollDown = () => {
     const el = battleRef.current;
     if (el) el.scrollTop = el.scrollHeight;
+  };
+
+  useEffect(() => {
+    if (result) requestAnimationFrame(scrollDown);
+  }, [result]);
+
+  const closeBattle = () => {
+    runId.current++;
+    setRunning(false);
+    setLoading(false);
+    setPriceReq(null);
+    onClose();
   };
 
   const bumpMarker = () => {
@@ -277,11 +294,17 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
 
   return (
     <>
-    <div className={"sheet-backdrop" + (open ? " open" : "")} onClick={onClose} />
-    <div className={"sheet" + (open ? " open" : "")}>
+    <div className={"sheet-backdrop" + (open ? " open" : "")} onClick={closeBattle} aria-hidden="true" />
+    <div
+      className={"sheet" + (open ? " open" : "")}
+      role={open ? "dialog" : undefined}
+      aria-modal={open && !priceReq ? true : undefined}
+      aria-hidden={!open || !!priceReq}
+      inert={!open || !!priceReq ? true : undefined}
+    >
       <div className="sheet-grabber" />
       <div className="sheet-header">
-        <button className="sheet-close" onClick={onClose} aria-label="閉じる">
+        <button className="sheet-close" type="button" onClick={closeBattle} aria-label="閉じる">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             <path d="M6 6l12 12M18 6L6 18" stroke="#222" strokeWidth="2.2" strokeLinecap="round" />
           </svg>
@@ -308,9 +331,9 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
           <div className="req-caution">
             交渉が成立しても購入するかはあなた次第。気軽におまかせできます。
           </div>
-          <div className="req-help" onClick={onOpenProfile}>
+          <button className="req-help" type="button" onClick={onOpenProfile}>
             AIの性格について <span className="q">?</span>
-          </div>
+          </button>
 
           <div className="req-divider" />
 
@@ -332,17 +355,22 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
           </div>
 
           <div className="req-field">
-            <div className="req-field-label">希望価格</div>
+            <label className="req-field-label" htmlFor="buyer-want">希望価格</label>
             <div className="want-input">
               <span className="want-yen">¥</span>
               <input
+                id="buyer-want"
+                name="buyer-want"
                 type="number"
+                inputMode="numeric"
+                autoComplete="off"
+                aria-describedby={err ? "buyer-want-error" : "buyer-want-range"}
                 value={buyerWant}
                 step={100}
                 onChange={(e) => setBuyerWant(Number(e.target.value))}
               />
             </div>
-            <div className="req-range">
+            <div className="req-range" id="buyer-want-range">
               希望できる価格は {yen(100)} 〜 {yen(ASK_PRICE - 1)} です
             </div>
           </div>
@@ -351,16 +379,16 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
             <span className="mytype-avatar">{meta.avatar}</span>
             <div className="mytype-info">
               <div className="mytype-name">あなたのAI：{meta.name}</div>
-              <div className="mytype-edit" onClick={onOpenProfile}>
+              <button className="mytype-edit" type="button" onClick={onOpenProfile}>
                 性格を診断・変更する ›
-              </div>
+              </button>
             </div>
           </div>
 
           <button className="start-btn" onClick={startBattle}>
             AIに交渉してもらう
           </button>
-          {err && <div className="err-msg">{err}</div>}
+          {err && <div className="err-msg" id="buyer-want-error" role="alert">{err}</div>}
         </div>
       ) : (
         <div className="battle-view">
@@ -405,8 +433,8 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
           </div>
 
           <div className="battle-scroll" ref={battleRef}>
-            {loading && <div className="loading">交渉中…</div>}
-            <div className="log">
+            {loading && <div className="loading" role="status">交渉中…</div>}
+            <div className="log" aria-live="polite" aria-busy={running}>
               {liveTurns.map((lt, idx) => (
                 <div className={"bubble-row " + lt.turn.speaker} key={idx}>
                   <span className="bname">{lt.who}</span>
@@ -432,7 +460,7 @@ export function BattleSheet({ open, onClose, onGoNotify, onOpenProfile }: Props)
             </div>
 
             {result && (
-              <div className={"result " + (result.status === "agreed" ? "agreed" : "stalled")}>
+              <div className={"result " + (result.status === "agreed" ? "agreed" : "stalled")} role="status">
                 {result.status === "agreed" && result.finalPrice ? (
                   <>
                     <div className="rt">AIが合意額を見つけました</div>
