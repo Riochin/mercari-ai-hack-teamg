@@ -279,6 +279,7 @@ body{
 
 /* ---- プロフィール画面：性格診断 ---- */
 .profile-screen{ display:flex; z-index:25; }
+.profile-screen > .sheet-header{ padding-top:30px; padding-bottom:10px; }
 .quiz-intro{ font-size:12.5px; color:var(--gray-1); text-align:center; margin-bottom:20px; line-height:1.6; }
 .quiz-intro b{ display:block; font-size:15px; color:var(--ink); font-weight:700; margin-bottom:4px; }
 .my-type-card{ text-align:center; background:var(--bg-gray); border-radius:14px; padding:26px 16px; margin-bottom:16px; }
@@ -304,7 +305,7 @@ body{
   width:112px; height:112px; margin:0 auto 12px; border-radius:50%; background:var(--bg-gray);
   display:flex; align-items:center; justify-content:center; overflow:hidden;
 }
-.persona-character-img{ width:100%; height:100%; object-fit:cover; }
+.persona-character-img{ width:100%; height:100%; object-fit:cover; transform:scale(1.55); }
 .persona-character-fallback{ font-size:50px; line-height:1; }
 .persona-character-fallback.is-hidden{ display:none; }
 .persona-catchphrase{ font-size:12.5px; font-weight:700; color:var(--blue); margin-bottom:10px; }
@@ -320,7 +321,7 @@ body{
   width:28px; height:28px; border-radius:50%; overflow:hidden; flex:none;
   background:var(--bg-gray); display:flex; align-items:center; justify-content:center;
 }
-.bavatar-img img{ width:100%; height:100%; object-fit:cover; }
+.bavatar-img img{ width:100%; height:100%; object-fit:cover; transform:scale(1.55); }
 .bavatar-fallback{ font-size:16px; line-height:1; }
 .bavatar-fallback.is-hidden{ display:none; }
 .naming-block{ border-top:1px dashed var(--line); padding-top:16px; }
@@ -418,7 +419,7 @@ body{
 }
 .character-avatar.mini{ width:32px; height:32px; }
 .character-avatar.chat{ width:28px; height:28px; }
-.character-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+.character-avatar img{ width:100%; height:100%; object-fit:cover; display:block; transform:scale(1.55); }
 .bubble{ max-width:74%; padding:9px 12px; border-radius:16px; font-size:13.5px; line-height:1.4; }
 .bubble-row.seller .bubble{ background:var(--bg-gray); color:var(--ink); border-bottom-left-radius:4px; }
 .bubble-row.buyer .bubble{ background:var(--blue); color:#fff; border-bottom-right-radius:4px; }
@@ -509,6 +510,9 @@ button:focus-visible, input:focus-visible, [role="button"]:focus-visible{
 .notif-item .n-title{ font-size:13px; font-weight:700; color:var(--ink); margin-bottom:3px; display:flex; align-items:center; gap:6px; }
 .notif-item .n-text{ font-size:12px; color:var(--gray-1); line-height:1.4; }
 .notif-item .n-time{ font-size:10.5px; color:var(--gray-2); margin-top:4px; }
+.notif-ai-row{ display:flex; align-items:center; gap:7px; margin-top:9px; }
+.notif-ai-name{ min-width:0; font-size:11.5px; font-weight:700; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.notif-ai-price{ margin-left:auto; font-size:14px; font-weight:900; color:var(--ink); white-space:nowrap; }
 .unread-dot{ width:8px; height:8px; border-radius:50%; background:var(--red); flex:none; }
 .notif-empty{ text-align:center; color:var(--gray-1); font-size:12.5px; padding:40px 16px; line-height:1.6; }
 
@@ -517,6 +521,14 @@ button:focus-visible, input:focus-visible, [role="button"]:focus-visible{
 .review-item img{ width:56px; height:56px; border-radius:8px; object-fit:cover; flex:none; }
 .review-item .ri-name{ font-size:14px; font-weight:700; color:var(--ink); }
 .review-item .ri-list{ font-size:12px; color:var(--gray-1); margin-top:2px; }
+.buyer-ai-summary{
+  display:flex; align-items:center; gap:10px; border:1px solid var(--line); border-radius:12px;
+  padding:11px 12px; margin-bottom:14px; background:#fff;
+}
+.buyer-ai-copy{ min-width:0; }
+.buyer-ai-label{ font-size:10.5px; color:var(--gray-1); margin-bottom:1px; }
+.buyer-ai-name{ font-size:13.5px; font-weight:800; color:var(--ink); }
+.buyer-ai-type{ font-size:10.5px; color:var(--blue); margin-top:2px; }
 
 .agree-hero{ text-align:center; background:var(--green-bg); border-radius:14px; padding:22px 16px; margin-bottom:14px; }
 .agree-hero .ah-label{ font-size:12px; color:var(--green); font-weight:700; margin-bottom:6px; }
@@ -530,6 +542,19 @@ button:focus-visible, input:focus-visible, [role="button"]:focus-visible{
 .diff-cell .dc-val{ font-size:15px; font-weight:700; color:var(--ink); }
 .diff-cell.min .dc-val{ color:var(--red-dark); }
 .diff-cell.ok .dc-val{ color:var(--green); }
+.decision-guide{
+  display:flex; align-items:flex-start; gap:10px; border-radius:12px; padding:12px; margin-bottom:14px;
+}
+.decision-guide.safe{ background:var(--green-bg); }
+.decision-guide.caution{ background:#FFE3E1; }
+.dg-icon{
+  width:22px; height:22px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:13px; font-weight:900;
+}
+.decision-guide.safe .dg-icon{ background:var(--green); }
+.decision-guide.caution .dg-icon{ background:var(--red-dark); }
+.dg-title{ font-size:12.5px; font-weight:800; color:var(--ink); line-height:1.4; }
+.dg-text{ font-size:11px; color:var(--gray-1); line-height:1.45; margin-top:2px; }
 
 /* やりとりアコーディオン */
 .accordion-toggle{
@@ -554,7 +579,7 @@ button:focus-visible, input:focus-visible, [role="button"]:focus-visible{
 }
 
 /* 承認 / 見送る */
-.seller-actions{ display:flex; flex-direction:column; gap:10px; }
+.seller-actions{ display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
 .approve-btn{ width:100%; background:var(--red); color:#fff; border:none; padding:14px; border-radius:24px; font-size:15px; font-weight:700; cursor:pointer; }
 .decline-btn{ width:100%; background:#fff; color:var(--ink); border:1.5px solid var(--ink); padding:13px; border-radius:24px; font-size:14px; font-weight:700; cursor:pointer; }
 
